@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Algoritmo di Dijkstra</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script src="dijkstra.js" defer></script>
+</head>
+<body>
+    <div id="grafo"></div>
+
+    <input type="text" id="nodo" placeholder="Nodo" required>
+    <input type="text" id="collegato" placeholder="Collegato a" required>
+    <input type="number" id="peso" placeholder="Peso" required>
+
+    <button type="button" id="addNode">Aggiungi nodo</button>
+
+    <br><br><br>
+
+    <button id="buttonShowGraph">Stampa grafo</button>
+
+    <br><br><br>
+
+    <input type="text" id="StartingNode" placeholder="Nodo di partenza" required>
+    <input type="text" id="EndNode" placeholder="Nodo di arrivo" required>
+    <button type="button" id="buttonRunDijkstra">Esegui disktra</button>
+
+    <div id="output"></div>
+</body>
+</html>
