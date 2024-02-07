@@ -25,15 +25,28 @@ document.addEventListener('DOMContentLoaded', (event) => {
 });
 
 function addNode() {
+    let selectStart = document.querySelector("#StartingNode");
     nodo = document.querySelector('#nodo').value;
     collegato = document.querySelector('#collegato').value;
     peso = parseInt(document.querySelector('#peso').value);
+
+
+
+
     if (!grafo[nodo]) {
         grafo[nodo] = {};
+        let option = document.createElement("option") ;
+        option.textContent = nodo;
+        document.querySelector("#StartingNode").append(option);
+        document.querySelector("#EndNode").append(option.cloneNode(true));
     }
     grafo[nodo][collegato] = peso;
     if (!grafo[collegato]) {
         grafo[collegato] = {};
+        let option = document.createElement("option");
+        option.textContent = collegato;
+        document.querySelector("#StartingNode").append(option);
+        document.querySelector("#EndNode").append(option.cloneNode(true));
     }
     grafo[collegato][nodo] = peso;
     document.querySelector('#nodo').value = '';
@@ -56,34 +69,67 @@ function showGraph() {
         console.error("L'elemento con l'ID 'grafo' non esiste nel documento HTML.");
     }
 }
-function runDijkstra() {
+
+function stampaRisultato(percorso, distanza) {
+    let outputDiv = document.querySelector('#output');
+    let percorsoElement = document.createElement('p');
+    percorsoElement.textContent = `Il percorso piu' breve e': ${percorso.join(' -> ')} con un peso totale di ${distanza}`;
+    outputDiv.appendChild(percorsoElement);
+}
+
+async function runDijkstra() {
     let nodoPartenza = document.querySelector("#StartingNode").value;
     let nodoArrivo = document.querySelector("#EndNode").value;
+    console.log(nodoPartenza, nodoArrivo);
 
-    // Verifica se il nodo di partenza e il nodo di arrivo esistono
-    if (!grafo[nodoPartenza] || !grafo[nodoArrivo]) {
-        alert('Il nodo di partenza o il nodo di arrivo non esistono nel grafo.');
-        return;
-    }
-
-    let { distanze, precedenti } = Dijkstra(grafo, nodoPartenza);
+// await serve per aspettare che la funzione Dijkstra finisca di funzionare prima di proseguire
+    let { distanze, precedenti } = await Dijkstra(grafo, nodoPartenza);
 
     let percorso = [];
     let nodoCorrente = nodoArrivo;
     do {
         percorso.unshift(nodoCorrente);
-        nodoCorrente = precedenti[nodoCorrente] !== undefined ? precedenti[nodoCorrente] : 0;
+        //prima di accederci controlla se esiste con hasOwnProperty
+        nodoCorrente = precedenti.hasOwnProperty(nodoCorrente) ? precedenti[nodoCorrente] : 0;
     } while (nodoCorrente !== nodoPartenza);
     percorso.unshift(nodoPartenza);
 
-    let outputDiv = document.querySelector('#output');
-    let percorsoElement = document.createElement('p');
-    percorsoElement.textContent = `Il percorso piu' breve da  ${nodoPartenza}  a  ${nodoArrivo}  e':  ${percorso.join(' -> ')} con un peso totale di  ${distanze[nodoArrivo]}`;
-    outputDiv.appendChild(percorsoElement);
+    stampaRisultato(percorso, distanze[nodoArrivo]);
 }
 
-function nodoDistanzaMinima(distanze, visitati) {
-    return Object.keys(distanze).reduce((minNodo, nodo) => (!visitati[nodo] && distanze[nodo] < distanze[minNodo] ? nodo : minNodo));
+async function Dijkstra(grafo, nodoPartenza) {
+    let distanze = {};
+    let visitati = {};
+    let precedenti = {};
+    let corrente = nodoPartenza;
+
+    for (let nodo in grafo) {
+        distanze[nodo] = Infinity;
+        visitati[nodo] = false;
+    }
+    distanze[nodoPartenza] = 0;
+    visitati[nodoPartenza] = true;
+    console.log(distanze, visitati)
+    do {
+        let tempCorrente = null;
+        let tempDistanza = Infinity;
+        for (let collegamento in grafo[corrente]) {
+            console.log(collegamento, tempCorrente, tempDistanza);
+            if (!visitati[collegamento] && grafo[collegamento][corrente] < tempDistanza) {
+                tempCorrente = collegamento;
+                tempDistanza = grafo[collegamento][corrente];
+                precedenti[collegamento] = corrente;
+                console.log(collegamento, tempCorrente, tempDistanza);
+                console.log(visitati);
+            }
+        }
+        corrente = tempCorrente;
+        visitati[corrente] = true;
+        console.log(corrente);
+    } while (corrente != null);
+
+
+    return { distanze, precedenti };
 }
 
 function mostraDistanze(distanze) {
